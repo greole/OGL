@@ -63,6 +63,7 @@ _run: &_run
 
   install:
     - git clone https://github.com/greole/OBR.git $HOME/OBR
+    - git clone https://develop.openfoam.com/committees/hpc.git $HOME/HPC
     - pip install docopt --user
 
 
@@ -72,17 +73,19 @@ _run: &_run
       - ls $FOAM_USER_LIBBIN
       - cd $HOME/OBR
       - cat $HOME/OBR/airFoil2D.json
-      - python runBenchmark.py --solver $SOLVER --backend OF,GKO --executor Ref --preconditioner $PRECOND --field p --test-run  --fail_on_error  --report=report.csv --folder=Test --parameters=/home/travis/OBR/airFoil2D.json
+      - cat $HOME/OBR/lidDrivenCavity3D.json
+      - python runBenchmark.py --solver $SOLVER --backend OF,GKO --executor Ref --preconditioner $PRECOND --field p --test-run  --fail_on_error  --report=report_airFoil.csv --folder=Test_airFoil --parameters=/home/travis/OBR/airFoil2D.json
+      - python runBenchmark.py --solver $SOLVER --backend OF,GKO --executor Ref --preconditioner $PRECOND --field p --test-run  --fail_on_error  --report=report_lidDrivenCavity.csv --folder=Test_lidDrivenCavity --parameters=/home/travis/OBR/lidDrivenCavity3D.json
       - mkdir -p $HOME/data
-      - cp report.csv $HOME/data/report.csv
-      - cat $HOME/data/report.csv
+      - cp report_*.csv $HOME/data/
+      - cat $HOME/data/report_*.csv
 
 _validate: &_validate
   stage: validate
   script:
-      - cat $HOME/data/report.csv
       - echo $TRAVIS_BUILD_DIR
-      - python $TRAVIS_BUILD_DIR/scripts/travis_check_results.py $HOME/data/report.csv
+      - python $TRAVIS_BUILD_DIR/scripts/travis_check_results.py $HOME/data/report_airFoil.csv
+      - python $TRAVIS_BUILD_DIR/scripts/travis_check_results.py $HOME/data/report_lidDrivenCavity.csv
 
 jobs:
   Include:
